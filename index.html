@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StableCoin DEX - Trade sETH & sBTC</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">🪙 StableCoin DEX</h1>
+                <div class="network-info">
+                    <span class="network-badge">Sepolia Testnet</span>
+                    <button id="connectWallet" class="btn btn-primary">Connect Wallet</button>
+                    <div id="walletInfo" class="wallet-info" style="display: none;">
+                        <span id="walletAddress"></span>
+                        <button id="disconnectWallet" class="btn btn-secondary">Disconnect</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="trading">🔄 Trading</button>
+            <button class="tab-btn" data-tab="minting">🏦 Minting</button>
+            <button class="tab-btn" data-tab="portfolio">📊 Portfolio</button>
+            <button class="tab-btn" data-tab="liquidation">⚡ Liquidation</button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Trading Tab -->
+            <div id="trading" class="tab-content active">
+                <div class="card">
+                    <h2>💱 Swap Stablecoins</h2>
+                    <div class="swap-container">
+                        <div class="swap-input-group">
+                            <label>From</label>
+                            <div class="input-container">
+                                <input type="number" id="fromAmount" placeholder="0.0" step="0.000001">
+                                <select id="fromToken">
+                                    <option value="sETH">sETH</option>
+                                    <option value="sBTC">sBTC</option>
+                                </select>
+                            </div>
+                            <div class="balance-info">
+                                Balance: <span id="fromBalance">0.00</span>
+                            </div>
+                        </div>
+
+                        <div class="swap-arrow">
+                            <button id="swapDirection" class="btn-icon">🔄</button>
+                        </div>
+
+                        <div class="swap-input-group">
+                            <label>To</label>
+                            <div class="input-container">
+                                <input type="number" id="toAmount" placeholder="0.0" readonly>
+                                <select id="toToken">
+                                    <option value="sBTC">sBTC</option>
+                                    <option value="sETH">sETH</option>
+                                </select>
+                            </div>
+                            <div class="balance-info">
+                                Balance: <span id="toBalance">0.00</span>
+                            </div>
+                        </div>
+
+                        <div class="exchange-rate">
+                            <span>Exchange Rate: </span>
+                            <span id="exchangeRate">Loading...</span>
+                        </div>
+
+                        <button id="swapBtn" class="btn btn-primary btn-large">Swap Tokens</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Minting Tab -->
+            <div id="minting" class="tab-content">
+                <div class="minting-grid">
+                    <!-- sETH Minting -->
+                    <div class="card">
+                        <h3>🔸 Mint sETH</h3>
+                        <div class="mint-form">
+                            <div class="input-group">
+                                <label>WETH Collateral</label>
+                                <input type="number" id="wethCollateral" placeholder="0.0" step="0.001">
+                                <div class="balance-info">
+                                    Balance: <span id="wethBalance">0.00</span> WETH
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>sETH to Mint</label>
+                                <input type="number" id="sethToMint" placeholder="0.0" step="0.001">
+                            </div>
+                            <div class="collateral-ratio">
+                                <span>Collateral Ratio: </span>
+                                <span id="sethCollateralRatio">---%</span>
+                            </div>
+                            <button id="mintSETH" class="btn btn-primary">Mint sETH</button>
+                        </div>
+                    </div>
+
+                    <!-- sBTC Minting -->
+                    <div class="card">
+                        <h3>🔶 Mint sBTC</h3>
+                        <div class="mint-form">
+                            <div class="input-group">
+                                <label>WBTC Collateral</label>
+                                <input type="number" id="wbtcCollateral" placeholder="0.0" step="0.00001">
+                                <div class="balance-info">
+                                    Balance: <span id="wbtcBalance">0.00</span> WBTC
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>sBTC to Mint</label>
+                                <input type="number" id="sbtcToMint" placeholder="0.0" step="0.00001">
+                            </div>
+                            <div class="collateral-ratio">
+                                <span>Collateral Ratio: </span>
+                                <span id="sbtcCollateralRatio">---%</span>
+                            </div>
+                            <button id="mintSBTC" class="btn btn-primary">Mint sBTC</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Portfolio Tab -->
+            <div id="portfolio" class="tab-content">
+                <div class="portfolio-grid">
+                    <!-- Portfolio Overview -->
+                    <div class="card">
+                        <h3>📊 Portfolio Overview</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <label>Total Portfolio Value</label>
+                                <span class="stat-value" id="totalPortfolioValue">$0.00</span>
+                            </div>
+                            <div class="stat-item">
+                                <label>Total Collateral</label>
+                                <span class="stat-value" id="totalCollateral">$0.00</span>
+                            </div>
+                            <div class="stat-item">
+                                <label>Total Debt</label>
+                                <span class="stat-value" id="totalDebt">$0.00</span>
+                            </div>
+                            <div class="stat-item">
+                                <label>Overall Health Factor</label>
+                                <span class="stat-value" id="overallHealthFactor">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- WETH Position -->
+                    <div class="card">
+                        <h3>🔸 WETH Position</h3>
+                        <div class="position-details">
+                            <div class="position-stat">
+                                <label>Collateral (WETH)</label>
+                                <span id="wethPositionCollateral">0.00</span>
+                            </div>
+                            <div class="position-stat">
+                                <label>Debt (sETH)</label>
+                                <span id="wethPositionDebt">0.00</span>
+                            </div>
+                            <div class="position-stat">
+                                <label>Health Factor</label>
+                                <span id="wethHealthFactor">--</span>
+                            </div>
+                            <div class="position-actions">
+                                <button id="burnSETH" class="btn btn-secondary">Burn sETH</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- WBTC Position -->
+                    <div class="card">
+                        <h3>🔶 WBTC Position</h3>
+                        <div class="position-details">
+                            <div class="position-stat">
+                                <label>Collateral (WBTC)</label>
+                                <span id="wbtcPositionCollateral">0.00</span>
+                            </div>
+                            <div class="position-stat">
+                                <label>Debt (sBTC)</label>
+                                <span id="wbtcPositionDebt">0.00</span>
+                            </div>
+                            <div class="position-stat">
+                                <label>Health Factor</label>
+                                <span id="wbtcHealthFactor">--</span>
+                            </div>
+                            <div class="position-actions">
+                                <button id="burnSBTC" class="btn btn-secondary">Burn sBTC</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liquidation Tab -->
+            <div id="liquidation" class="tab-content">
+                <div class="card">
+                    <h2>⚡ Liquidation Interface</h2>
+                    <p class="warning-text">🚨 <strong>Warning:</strong> Liquidation is a high-risk operation. Only proceed if you understand the risks.</p>
+                    
+                    <div class="liquidation-form">
+                        <div class="input-group">
+                            <label>Target Address</label>
+                            <input type="text" id="liquidationTarget" placeholder="0x..." pattern="^0x[a-fA-F0-9]{40}$">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>Position Type</label>
+                            <select id="liquidationType">
+                                <option value="weth">WETH Position (sETH)</option>
+                                <option value="wbtc">WBTC Position (sBTC)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>Debt to Cover</label>
+                            <input type="number" id="debtToCover" placeholder="0.0" step="0.001">
+                        </div>
+                        
+                        <div id="targetPositionInfo" class="position-info">
+                            <h4>Target Position Details</h4>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span>Collateral:</span>
+                                    <span id="targetCollateral">--</span>
+                                </div>
+                                <div class="info-item">
+                                    <span>Debt:</span>
+                                    <span id="targetDebt">--</span>
+                                </div>
+                                <div class="info-item">
+                                    <span>Health Factor:</span>
+                                    <span id="targetHealthFactor">--</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="liquidation-actions">
+                            <button id="checkPosition" class="btn btn-secondary">Check Position</button>
+                            <button id="liquidatePosition" class="btn btn-warning">Liquidate Position</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Price Information Footer -->
+        <footer class="price-footer">
+            <div class="price-info">
+                <div class="price-item">
+                    <span class="price-label">ETH/USD:</span>
+                    <span id="ethPrice" class="price-value">Loading...</span>
+                </div>
+                <div class="price-item">
+                    <span class="price-label">BTC/USD:</span>
+                    <span id="btcPrice" class="price-value">Loading...</span>
+                </div>
+                <div class="price-item">
+                    <span class="price-label">Exchange Rate:</span>
+                    <span id="footerExchangeRate" class="price-value">Loading...</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Notification System -->
+    <div id="notifications" class="notifications"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Processing transaction...</p>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>

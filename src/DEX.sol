@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import {stablecoinWBTCEngine} from "./StablecoinWBTCEngine.sol";
 import {StableCoinEngine} from "./StableCoinEngine.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 contract DEX {
     stablecoinWBTCEngine public stablecoinWBTCEngineContract;
@@ -53,17 +53,18 @@ contract DEX {
         return (priceWBTC * 1e18) / priceWETH; // Return exchange rate with 18 decimals
     }
 
-    // *** INCOMING transfers: pull tokens from msg.sender using transferFrom ***
+    // *** INCOMING transfers: pull tokens from msg.sender using transfer***
     function _pullStableCoinFromSender(uint256 _amount) internal {
-        require(stablecoin.transferFrom(msg.sender, address(this), _amount), "pull sETH failed");
+        require(stablecoin.transfer(address(this), _amount), "pull sETH failed");
     }
     function _pullStableCoinWBTCFromSender(uint256 _amount) internal {
-        require(stablecoinWbtc.transferFrom(msg.sender, address(this), _amount), "pull sBTC failed");
+        require(stablecoinWbtc.transfer(address(this), _amount), "pull sBTC failed");
     }
 
     // *** OUTGOING transfers: contract pays from its own balance using transfer ***
     function _sendStableCoinTo(address _to, uint256 _amount) internal {
         require(stablecoin.balanceOf(address(this)) >= _amount, "DEX: insufficient sETH liquidity");
+
         require(stablecoin.transfer(_to, _amount), "send sETH failed");
     }
     function _sendStableCoinWBTCTo(address _to, uint256 _amount) internal {

@@ -28,7 +28,7 @@ contract StableCoinEngine {
     }
     function depositCollateral(uint256 _amount) public {
         require(_amount > 0, "Amount must be greater than zero");
-        bool success = weth.transferFrom(msg.sender, address(this), _amount);
+        bool success = weth.transfer(address(this), _amount);
         require(success, "Transfer failed");
         collateralDeposits[msg.sender] += _amount;
     } 
@@ -37,7 +37,7 @@ contract StableCoinEngine {
         require(_mintAmount > 0, "Mint amount must be greater than zero");
         uint256 collateralValue = (_amount * getLatestPrice()) / 1e8;
         require(collateralValue >= _mintAmount, "Insufficient collateral value");
-        bool success = weth.transferFrom(msg.sender, address(this), _amount);
+        bool success = weth.transfer(address(this), _amount);
         require(success, "Transfer failed");
         stableCoin.mint(msg.sender, _mintAmount);
         collateralDeposits[msg.sender] += _amount;
