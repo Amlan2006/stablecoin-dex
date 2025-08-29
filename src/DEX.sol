@@ -23,7 +23,7 @@ contract DEX {
         stablecoinWbtc = IERC20(_stablecoinWBTC);
     }
 
-    /* -------------------- wrappers to engines -------------------- */
+    // wrappers to engines 
     function depositWBTCCollateralAndMintstablecoinWBTC(uint256 _wbtcAmount, uint256 _mintAmount) public {
         stablecoinWBTCEngineContract.depositCollateralAndMintstablecoinWBTC(_wbtcAmount, _mintAmount);
     }
@@ -44,7 +44,7 @@ contract DEX {
         return stablecoinWBTCEngineContract.calculateHealthFactor(_user);
     }
 
-    /* -------------------- exchange logic -------------------- */
+    // exchange logic 
     // exchangeRate = priceWBTC / priceWETH, scaled by 1e18. => WETH per WBTC
     function getExchangeRate() public view returns (uint256) {
         uint256 priceWETH = stableCoinEngineContract.getLatestPrice();
@@ -53,7 +53,7 @@ contract DEX {
         return (priceWBTC * 1e18) / priceWETH; // Return exchange rate with 18 decimals
     }
 
-    // *** INCOMING transfers: pull tokens from msg.sender using transfer***
+    // INCOMING transfers: pull tokens from msg.sender using transfer
     function _pullStableCoinFromSender(uint256 _amount) internal {
         require(stablecoin.transfer(address(this), _amount), "pull sETH failed");
     }
@@ -61,7 +61,7 @@ contract DEX {
         require(stablecoinWbtc.transfer(address(this), _amount), "pull sBTC failed");
     }
 
-    // *** OUTGOING transfers: contract pays from its own balance using transfer ***
+    // OUTGOING transfers: contract pays from its own balance using transfer
     function _sendStableCoinTo(address _to, uint256 _amount) internal {
         require(stablecoin.balanceOf(address(this)) >= _amount, "DEX: insufficient sETH liquidity");
 
