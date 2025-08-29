@@ -4,7 +4,7 @@ import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC2
 pragma solidity ^0.8.0;
 contract StableCoin is ERC20, ERC20Burnable {
 constructor() ERC20("StableCoin", "STC") {
-
+_mint(msg.sender, 1000e18);
 }
 function mint(address to, uint256 amount) external {
     require(to != address(0), "Cannot mint to the zero address");
